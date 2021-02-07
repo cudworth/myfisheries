@@ -1,0 +1,17 @@
+.navigation-bar {
+  background-color: blue;
+  color: black;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 84px;
+}
+
+.navigation-bar-title {
+  font-family: 'Knewave', cursive;
+}
