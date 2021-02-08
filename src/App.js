@@ -1,7 +1,7 @@
 import './App.css';
-import OverlayMap from './OverlayMap/OverlayMap';
 import NavigationBar from './NavigationBar/NavigationBar';
 import Github from './Github/Github';
+import firebaseModule from './firebaseModule';
 
 function App() {
   return (
