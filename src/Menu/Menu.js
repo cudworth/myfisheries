@@ -27,9 +27,7 @@ const Menu = function (props) {
   function renderText() {
     if (config.text) {
       return (
-        <span className={`Menu-text ${config.classes.text}`}>
-          {config.text}
-        </span>
+        <div className={`Menu-text ${config.classes.text}`}>{config.text}</div>
       );
     }
   }

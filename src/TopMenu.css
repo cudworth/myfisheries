@@ -1,19 +1,27 @@
 .TopMenu {
-  background-color: red;
-}
-
-.TopMenu-text {
-  background-color: orange;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid black;
 }
 
 .TopMenu-img {
-  background-color: yellow;
+  margin: 8px;
+}
+
+.TopMenu-text {
+  margin: 8px;
 }
 
 .TopMenu-drawer {
-  background-color: green;
+  background-color: white;
+  border: 1px solid black;
 }
 
 .TopMenu-item {
-  background-color: blue;
+  padding: 8px;
+  border: 1px solid white;
+}
+
+.TopMenu-item:hover {
+  border: 1px solid black;
 }

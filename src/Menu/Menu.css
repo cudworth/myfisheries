@@ -1,6 +1,9 @@
 .Menu {
-  position: relative;
   cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .Menu-text {
