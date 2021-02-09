@@ -7,7 +7,7 @@ const NavigationBar = function (props) {
     <div className="navigation-bar">
       <TopMenu />
       <div>My Fisheries App</div>
-      <AuthPanel />
+      <AuthPanel state={props.state} firebase={props.firebase} />
     </div>
   );
 };

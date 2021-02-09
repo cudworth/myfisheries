@@ -1,16 +1,15 @@
 import firebase from 'firebase/app';
+import 'firebase/auth';
 import 'firebase/firestore';
 import 'firebase/storage';
 import { firebaseConfig } from './private';
 
-// Initialize Firebase with a "default" Firebase project
 const myFirebase = firebase.initializeApp(firebaseConfig);
 const myFirestore = myFirebase.firestore();
 const myStorage = myFirebase.storage();
 
 function firebaseModule() {
   function signIn() {
-    // Sign into Firebase using popup auth & Google as the identity provider.
     var provider = new firebase.auth.GoogleAuthProvider();
     return firebase.auth().signInWithPopup(provider);
   }
