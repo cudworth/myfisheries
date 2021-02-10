@@ -1,27 +1,27 @@
-.TopMenu {
+.MainMenu {
   background-color: white;
   border-radius: 8px;
   border: 1px solid black;
 }
 
-.TopMenu-img {
+.MainMenu-img {
   margin: 8px;
 }
 
-.TopMenu-text {
+.MainMenu-text {
   margin: 8px;
 }
 
-.TopMenu-drawer {
+.MainMenu-drawer {
   background-color: white;
   border: 1px solid black;
 }
 
-.TopMenu-item {
+.MainMenu-item {
   padding: 8px;
   border: 1px solid white;
 }
 
-.TopMenu-item:hover {
+.MainMenu-item:hover {
   border: 1px solid black;
 }

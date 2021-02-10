@@ -1,11 +1,11 @@
 import './NavigationBar.css';
-import TopMenu from '../TopMenu';
+import MainMenu from '../MainMenu/MainMenu';
 import AuthPanel from '../AuthPanel/AuthPanel';
 
 const NavigationBar = function (props) {
   return (
     <div className="navigation-bar">
-      <TopMenu />
+      <MainMenu />
       <div>My Fisheries App</div>
       <AuthPanel state={props.state} firebase={props.firebase} />
     </div>

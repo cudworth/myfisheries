@@ -15,24 +15,22 @@ const AuthPanel = function (props) {
     });
   }, [firebase, setState]);
 
-  const renderPanel = function () {
-    if (!state.user) {
-      return (
-        <div>
-          <input value="Sign In" type="button" onClick={firebase.signIn} />;
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <div>{state.user.displayName}</div>
-          <input value="Sign Out" type="button" onClick={firebase.signOut} />
-        </div>
-      );
-    }
-  };
-
-  return <div className="AuthPanel">{renderPanel()}</div>;
+  if (!state.user) {
+    return (
+      <div className="AuthPanel">
+        <input value="Sign In" type="button" onClick={firebase.signIn} />;
+      </div>
+    );
+  } else {
+    return (
+      <div className="AuthPanel">
+        <div>{state.user.displayName}</div>
+        <input value="Sign Out" type="button" onClick={firebase.signOut} />
+      </div>
+    );
+  }
 };
+
+//        <input value="Sign Out" type="button" onClick={firebase.signOut} />
 
 export default AuthPanel;

@@ -1,2 +1,9 @@
 .AuthPanel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.AuthPanel input {
+  cursor: pointer;
 }

@@ -1,18 +1,18 @@
-import Menu from './Menu/Menu.js';
-import './TopMenu.css';
-import menuIcon from './TopMenu.svg';
+import Menu from '../Menu/Menu.js';
+import './MainMenu.css';
+import menuIcon from './MainMenu.svg';
 
 const myConfig = {
-  id: 'TopMenu',
+  id: 'MainMenu',
   classes: {
-    menu: 'TopMenu',
-    text: 'TopMenu-text',
-    img: 'TopMenu-img',
-    drawer: 'TopMenu-drawer',
-    item: 'TopMenu-item',
+    menu: 'MainMenu',
+    text: 'MainMenu-text',
+    img: 'MainMenu-img',
+    drawer: 'MainMenu-drawer',
+    item: 'MainMenu-item',
   },
   text: 'Menu',
-  img: { src: menuIcon, alt: 'Top menu icon', width: '42px', height: '42px' },
+  img: { src: menuIcon, alt: 'Main menu icon', width: '42px', height: '42px' },
 };
 
 const myItems = [
@@ -38,8 +38,8 @@ const myItems = [
   },
 ];
 
-const TopMenu = function (props) {
+const MainMenu = function (props) {
   return <Menu config={myConfig} items={myItems} />;
 };
 
-export default TopMenu;
+export default MainMenu;

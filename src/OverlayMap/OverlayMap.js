@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
+import { googleMapsKey } from '../private';
+
 /* global google */
 
 function OverlayMap(props) {
@@ -8,7 +10,7 @@ function OverlayMap(props) {
 
   useEffect(() => {
     const loader = new Loader({
-      apiKey: process.env.REACT_APP_GOOGLE_API_KEY,
+      apiKey: googleMapsKey,
       version: 'weekly',
     });
 
