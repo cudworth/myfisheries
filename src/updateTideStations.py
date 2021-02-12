@@ -8,3 +8,4 @@ if r.status_code == 200:
       json.dump(r.json(),f)
 else:
   print('request failed')
+  

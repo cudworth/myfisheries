@@ -1,13 +1,22 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
 import { googleMapsKey } from '../private';
 
 /* global google */
 
+const defaultState = {
+  location: '',
+  lat: 47.608013,
+  lng: -122.335167,
+  radius: null,
+  date: getDateString(),
+};
+
 function OverlayMap(props) {
+  const [appState, setAppState] = props.state;
+  const [state, setState] = useState({ ...defaultState });
   const myRef = useRef(null);
-  const [state, setState] = props.state;
   const stations = props.stations;
 
   useEffect(() => {
@@ -20,7 +29,7 @@ function OverlayMap(props) {
       myRef.current = new google.maps.Map(
         document.getElementById('overlay-map'),
         {
-          center: { lat: state.map.lat, lng: state.map.lon },
+          center: { lat: state.lat, lng: state.lng },
           zoom: 8,
         }
       );
@@ -39,33 +48,57 @@ function OverlayMap(props) {
     });
   }
 
-  return <div id="overlay-map" className="overlay-map"></div>;
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log('submitted ', state.location, state.date);
+  }
+
+  function handleChange(attribute, value) {
+    setState((prev) => {
+      const next = { ...prev };
+      next[attribute] = value;
+      return next;
+    });
+  }
+
+  return (
+    <div>
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <label>
+          Location Search
+          <input
+            type="text"
+            placeholder="Seattle, Washington"
+            value={state.location}
+            onChange={(e) => handleChange('location', e.target.value)}
+          />
+        </label>
+
+        <label>
+          Date
+          <input
+            type="date"
+            value={state.date}
+            onChange={(e) => handleChange('date', e.target.value)}
+          />
+        </label>
+      </form>
+      <div id="overlay-map" className="overlay-map"></div>
+    </div>
+  );
 }
 
 export default OverlayMap;
 
-/*
-function initMap() {
-  const myLatlng = { lat: -25.363, lng: 131.044 };
-  const map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 4,
-    center: myLatlng,
-  });
-  const marker = new google.maps.Marker({
-    position: myLatlng,
-    map,
-    title: "Click to zoom",
-  });
-  map.addListener("center_changed", () => {
-    // 3 seconds after the center of the map has changed, pan back to the
-    // marker.
-    window.setTimeout(() => {
-      map.panTo(marker.getPosition());
-    }, 3000);
-  });
-  marker.addListener("click", () => {
-    map.setZoom(8);
-    map.setCenter(marker.getPosition());
-  });
+function pad(n) {
+  return n < 10 ? '0' + n : n;
 }
-*/
+
+function getDateString() {
+  const dateObject = new Date();
+  return [
+    dateObject.getFullYear(),
+    pad(1 + dateObject.getMonth()),
+    pad(dateObject.getDate()),
+  ].join('-');
+}
