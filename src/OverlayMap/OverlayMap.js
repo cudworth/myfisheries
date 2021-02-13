@@ -7,9 +7,6 @@ import { googleMapsKey } from '../private';
 
 const defaultState = {
   location: '',
-  lat: 47.608013,
-  lng: -122.335167,
-  radius: null,
   date: getDateString(),
 };
 
@@ -25,19 +22,38 @@ function OverlayMap(props) {
       version: 'weekly',
     });
 
-    loader.load().then(() => {
-      myRef.current = new google.maps.Map(
-        document.getElementById('overlay-map'),
-        {
-          center: { lat: state.lat, lng: state.lng },
-          zoom: 8,
-        }
-      );
-      renderStationMarkers();
-    });
+    loader
+      .load()
+      .then(() => {
+        myRef.current = new google.maps.Map(
+          document.getElementById('overlay-map'),
+          {
+            //default attributes here
+          }
+        );
+        addTideStationMarkers();
+        mapTo('Tacoma, Washington');
+      })
+      .then(() => {});
   }, []);
 
-  function renderStationMarkers() {
+  function mapTo(query) {
+    const myGeocoder = new google.maps.Geocoder();
+    myGeocoder.geocode(
+      {
+        address: query,
+      },
+      (response) => {
+        if (response.length) {
+          myRef.current.fitBounds(response[0].geometry.viewport);
+        } else {
+          alert(`${state.location} could not be found.`);
+        }
+      }
+    );
+  }
+
+  function addTideStationMarkers() {
     stations.forEach((station) => {
       const marker = new google.maps.Marker({
         map: myRef.current,
@@ -50,7 +66,7 @@ function OverlayMap(props) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    console.log('submitted ', state.location, state.date);
+    mapTo(state.location);
   }
 
   function handleChange(attribute, value) {
@@ -68,7 +84,7 @@ function OverlayMap(props) {
           Location Search
           <input
             type="text"
-            placeholder="Seattle, Washington"
+            placeholder="Tacoma, WA"
             value={state.location}
             onChange={(e) => handleChange('location', e.target.value)}
           />
@@ -90,10 +106,6 @@ function OverlayMap(props) {
 
 export default OverlayMap;
 
-function pad(n) {
-  return n < 10 ? '0' + n : n;
-}
-
 function getDateString() {
   const dateObject = new Date();
   return [
@@ -101,4 +113,8 @@ function getDateString() {
     pad(1 + dateObject.getMonth()),
     pad(dateObject.getDate()),
   ].join('-');
+
+  function pad(n) {
+    return n < 10 ? '0' + n : n;
+  }
 }

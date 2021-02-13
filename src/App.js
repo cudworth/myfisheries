@@ -23,7 +23,7 @@ tides
   .then((data) => console.log(data));
 */
 
-const defaultState = { user: null, map: { lat: 47.608013, lng: -122.335167 } };
+const defaultState = { user: null };
 const firebase = firebaseModule();
 
 function App() {
