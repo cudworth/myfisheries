@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
 import tideStations from '../Tides/tideStations.json';
@@ -6,14 +6,8 @@ import { googleMapsKey } from '../private';
 
 /* global google */
 
-const defaultState = {
-  location: '',
-  date: getDateString(),
-};
-
 function OverlayMap(props) {
-  const [appState, setAppState] = props.state;
-  const [state, setState] = useState({ ...defaultState });
+  const [state, setState] = props.state;
   const myRef = useRef(null);
 
   useEffect(() => {
@@ -56,10 +50,14 @@ function OverlayMap(props) {
   function addTideStationMarkers() {
     tideStations.stations.forEach((station) => {
       const marker = new google.maps.Marker({
-        map: myRef.current,
         position: { lat: station.lat, lng: station.lng },
-        name: station.name,
-        title: 'title here',
+        title: station.name,
+      });
+
+      marker.setMap(myRef.current);
+
+      google.maps.event.addListener(marker, 'click', () => {
+        console.log('clicked');
       });
     });
   }
@@ -105,16 +103,3 @@ function OverlayMap(props) {
 }
 
 export default OverlayMap;
-
-function getDateString() {
-  const dateObject = new Date();
-  return [
-    dateObject.getFullYear(),
-    pad(1 + dateObject.getMonth()),
-    pad(dateObject.getDate()),
-  ].join('-');
-
-  function pad(n) {
-    return n < 10 ? '0' + n : n;
-  }
-}
