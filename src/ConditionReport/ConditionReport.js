@@ -1,8 +1,12 @@
 import './ConditionReport.css';
+import { useState } from 'react';
 import { weatherModule } from '../Weather/weatherModule';
 import { tidesModule } from '../Tides/tidesModule';
 
+const defaultState = {};
+
 function ConditionReport(props) {
+  const [state, setState] = useState({ ...defaultState });
   return (
     <div className="ConditionReport">
       <div>Weather Report</div>

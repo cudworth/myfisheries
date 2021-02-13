@@ -4,18 +4,59 @@ import OverlayMap from '../OverlayMap/OverlayMap';
 import ConditionReport from '../ConditionReport/ConditionReport';
 
 const defaultState = {
-  location: '',
+  location: 'Tacoma, WA',
+  inputText: '',
   date: getDateString(),
   activeStation: null,
 };
 
 function Explorer(props) {
-  const explorerState = useState({ ...defaultState });
+  const [state, setState] = useState({ ...defaultState });
+
+  function setStateHelper(obj) {
+    setState((prev) => {
+      const next = { ...prev };
+      Object.keys(obj).forEach((key) => {
+        next[key] = obj[key];
+      });
+      return next;
+    });
+  }
 
   return (
     <div className="Explorer">
-      <OverlayMap state={explorerState} />
-      <ConditionReport state={explorerState} />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setStateHelper({
+            location: state.inputText,
+            inputText: '',
+          });
+        }}
+      >
+        <label>
+          <input
+            type="text"
+            placeholder="Location Search"
+            value={state.inputText}
+            onChange={(e) => setStateHelper({ inputText: e.target.value })}
+          />
+        </label>
+
+        <label>
+          Date
+          <input
+            type="date"
+            value={state.date}
+            onChange={(e) => setStateHelper({ date: e.target.value })}
+          />
+        </label>
+      </form>
+      <OverlayMap
+        location={state.location}
+        onStationClick={(station) => console.log(station)}
+      />
+      <ConditionReport />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
 import tideStations from '../Tides/tideStations.json';
@@ -6,30 +6,44 @@ import { googleMapsKey } from '../private';
 
 /* global google */
 
+const defaultState = { isMapLoaded: false };
+
 function OverlayMap(props) {
-  const [state, setState] = props.state;
-  const myRef = useRef(null);
+  const { location, onStationClick } = props;
+  const [state, setState] = useState({ ...defaultState });
+  const mapRef = useRef(null);
+
+  function setStateHelper(obj) {
+    setState((prev) => {
+      const next = { ...prev };
+      Object.keys(obj).forEach((key) => {
+        next[key] = obj[key];
+      });
+      return next;
+    });
+  }
 
   useEffect(() => {
-    const loader = new Loader({
+    const myLoader = new Loader({
       apiKey: googleMapsKey,
       version: 'weekly',
     });
 
-    loader
-      .load()
-      .then(() => {
-        myRef.current = new google.maps.Map(
-          document.getElementById('overlay-map'),
-          {
-            //default attributes here
-          }
-        );
-        addTideStationMarkers();
-        mapTo('Tacoma, Washington');
-      })
-      .then(() => {});
+    myLoader.load().then(() => {
+      mapRef.current = new google.maps.Map(
+        document.getElementById('overlay-map'),
+        {}
+      );
+      addTideStationMarkers();
+      setStateHelper({ isMapLoaded: true });
+    });
   }, []);
+
+  useEffect(() => {
+    if (state.isMapLoaded) {
+      mapTo(location);
+    }
+  }, [state.isMapLoaded, location]);
 
   function mapTo(query) {
     const myGeocoder = new google.maps.Geocoder();
@@ -39,9 +53,9 @@ function OverlayMap(props) {
       },
       (response) => {
         if (response.length) {
-          myRef.current.fitBounds(response[0].geometry.viewport);
+          mapRef.current.fitBounds(response[0].geometry.viewport);
         } else {
-          alert(`${state.location} could not be found.`);
+          alert(`'${query}' could not be found.`);
         }
       }
     );
@@ -54,52 +68,15 @@ function OverlayMap(props) {
         title: station.name,
       });
 
-      marker.setMap(myRef.current);
+      marker.setMap(mapRef.current);
 
       google.maps.event.addListener(marker, 'click', () => {
-        console.log('clicked');
+        onStationClick(station);
       });
     });
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    mapTo(state.location);
-  }
-
-  function handleChange(attribute, value) {
-    setState((prev) => {
-      const next = { ...prev };
-      next[attribute] = value;
-      return next;
-    });
-  }
-
-  return (
-    <div>
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <label>
-          Location Search
-          <input
-            type="text"
-            placeholder="Tacoma, WA"
-            value={state.location}
-            onChange={(e) => handleChange('location', e.target.value)}
-          />
-        </label>
-
-        <label>
-          Date
-          <input
-            type="date"
-            value={state.date}
-            onChange={(e) => handleChange('date', e.target.value)}
-          />
-        </label>
-      </form>
-      <div id="overlay-map" className="overlay-map"></div>
-    </div>
-  );
+  return <div id="overlay-map" className="overlay-map"></div>;
 }
 
 export default OverlayMap;
