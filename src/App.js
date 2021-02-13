@@ -4,7 +4,6 @@ import Github from './Github/Github';
 import firebaseModule from './firebaseModule';
 import OverlayMap from './OverlayMap/OverlayMap';
 import { useState } from 'react';
-import tideStations from './tideStations.json';
 
 import { tidesModule } from './Tides/tidesModule';
 import { weatherModule } from './Weather/weatherModule';
@@ -34,7 +33,7 @@ function App() {
     <div className="App">
       <div className="App-container">
         <NavigationBar state={appState} firebase={firebase} />
-        <OverlayMap state={appState} stations={tideStations.stations} />
+        <OverlayMap state={appState} />
         <Github />
       </div>
     </div>

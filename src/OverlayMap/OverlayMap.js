@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
+import tideStations from '../Tides/tideStations.json';
 import { googleMapsKey } from '../private';
 
 /* global google */
@@ -14,7 +15,6 @@ function OverlayMap(props) {
   const [appState, setAppState] = props.state;
   const [state, setState] = useState({ ...defaultState });
   const myRef = useRef(null);
-  const stations = props.stations;
 
   useEffect(() => {
     const loader = new Loader({
@@ -54,7 +54,7 @@ function OverlayMap(props) {
   }
 
   function addTideStationMarkers() {
-    stations.forEach((station) => {
+    tideStations.stations.forEach((station) => {
       const marker = new google.maps.Marker({
         map: myRef.current,
         position: { lat: station.lat, lng: station.lng },
