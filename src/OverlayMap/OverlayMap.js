@@ -9,7 +9,7 @@ import { googleMapsKey } from '../private';
 const defaultState = { isMapLoaded: false };
 
 function OverlayMap(props) {
-  const { location, onStationClick } = props;
+  const { location, onTideStationClick } = props;
   const [state, setState] = useState({ ...defaultState });
   const mapRef = useRef(null);
 
@@ -71,7 +71,7 @@ function OverlayMap(props) {
       marker.setMap(mapRef.current);
 
       google.maps.event.addListener(marker, 'click', () => {
-        onStationClick(station);
+        onTideStationClick(station);
       });
     });
   }

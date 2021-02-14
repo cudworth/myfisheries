@@ -6,8 +6,9 @@ import ConditionReport from '../ConditionReport/ConditionReport';
 const defaultState = {
   location: 'Tacoma, WA',
   inputText: '',
-  date: getDateString(),
-  activeStation: null,
+  htmlDate: getHtmlDate(),
+  date: getDate(),
+  tideStation: {},
 };
 
 function Explorer(props) {
@@ -47,31 +48,42 @@ function Explorer(props) {
           Date
           <input
             type="date"
-            value={state.date}
-            onChange={(e) => setStateHelper({ date: e.target.value })}
+            value={state.htmlDate}
+            onChange={(e) =>
+              setStateHelper({
+                htmlDate: e.target.value,
+                date: getDate(e.target.value),
+              })
+            }
           />
         </label>
       </form>
       <OverlayMap
         location={state.location}
-        onStationClick={(station) => console.log(station)}
+        onTideStationClick={(tideStation) => setStateHelper({ tideStation })}
       />
-      <ConditionReport />
+      <ConditionReport tideStation={state.tideStation} date={state.date} />
     </div>
   );
 }
 
 export default Explorer;
 
-function getDateString() {
-  const dateObject = new Date();
+//PRIVATE
+
+function getHtmlDate(date = new Date()) {
   return [
-    dateObject.getFullYear(),
-    pad(1 + dateObject.getMonth()),
-    pad(dateObject.getDate()),
+    date.getFullYear(),
+    pad(1 + date.getMonth()),
+    pad(date.getDate()),
   ].join('-');
 
   function pad(n) {
     return n < 10 ? '0' + n : n;
   }
+}
+
+function getDate(htmlDate = getHtmlDate()) {
+  const [YYYY, MM, DD] = htmlDate.split('-');
+  return new Date(YYYY, MM - 1, DD);
 }
