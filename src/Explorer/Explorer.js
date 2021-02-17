@@ -8,7 +8,7 @@ const defaultState = {
   inputText: '',
   htmlDate: getHtmlDate(),
   date: getDate(),
-  tideStation: {},
+  tideStation: null,
 };
 
 function Explorer(props) {

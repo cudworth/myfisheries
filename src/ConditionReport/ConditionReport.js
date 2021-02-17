@@ -8,7 +8,7 @@ const myTides = tidesModule();
 
 const defaultState = {
   weather: {},
-  tides: {},
+  tides: null,
   riverFlows: {},
 };
 
@@ -27,17 +27,58 @@ function ConditionReport(props) {
   }
 
   useEffect(() => {
-    console.log(tideStation);
-    myTides.getTides(tideStation.id, date).then((tideData) => {
-      console.log('tideData ', tideData);
-      setStateHelper({ tides: tideData });
-    });
+    if (tideStation) {
+      myTides.getTide(tideStation, date).then((tideData) => {
+        setStateHelper({ tides: tideData });
+      });
+    }
   }, [tideStation, date]);
 
+  function renderTidesReport() {
+    function deltaCard(arr, i) {
+      const obj = arr[i];
+      return (
+        <div className="ConditionReport-delta-card" key={`delta_key_${i}`}>
+          <div>{obj.type}</div>
+          <div>{obj.duration}</div>
+          <div>{obj.rate}</div>
+        </div>
+      );
+    }
+
+    function hiloCard(arr, i) {
+      const obj = arr[i];
+      return (
+        <div className="ConditionReport-hilo-card" key={`hilo_key_${i}`}>
+          <div>{obj.type}</div>
+          <div>{obj.time}</div>
+          <div>{obj.height}</div>
+        </div>
+      );
+    }
+
+    if (state.tides) {
+      const { hilo, delta } = state.tides;
+      const cards = [];
+      let i;
+      for (i = 0; i < hilo.length; i++) {
+        cards.push(deltaCard(delta, i));
+        cards.push(hiloCard(hilo, i));
+      }
+      cards.push(deltaCard(delta, hilo.length));
+      return (
+        <div className="ConditionReport">
+          <div>Tide Report</div>
+          <div className="ConditionReport-container">{cards}</div>
+        </div>
+      );
+    }
+  }
+
   return (
-    <div className="ConditionReport">
+    <div>
       <div>Weather Report</div>
-      <div>Tide Report</div>
+      {renderTidesReport()}
       <div>River Flows</div>
     </div>
   );
