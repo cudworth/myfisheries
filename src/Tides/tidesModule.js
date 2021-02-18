@@ -9,31 +9,27 @@ function tidesModule() {
     const startDate = new Date();
     startDate.setDate(date.getDate() - 1);
 
-    return new Promise((resolve, reject) => {
-      const dateString =
-        startDate.getFullYear() +
-        pad(1 + startDate.getMonth()) +
-        pad(startDate.getDate());
+    const dateString =
+      startDate.getFullYear() +
+      pad(1 + startDate.getMonth()) +
+      pad(startDate.getDate());
 
-      const url = [
-        'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?',
-        `station=${station.id}`,
-        'format=json',
-        'units=english',
-        'time_zone=lst_ldt',
-        'datum=MLLW',
-        'interval=hilo',
-        `product=${'predictions'}`,
-        `begin_date=${dateString}`,
-        `range=${72}`,
-      ].join('&');
+    const url = [
+      'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?',
+      `station=${station.id}`,
+      'format=json',
+      'units=english',
+      'time_zone=lst_ldt',
+      'datum=MLLW',
+      'interval=hilo',
+      `product=${'predictions'}`,
+      `begin_date=${dateString}`,
+      `range=${3 * 24}`,
+    ].join('&');
 
-      fetch(url)
-        .then((resp) => resp.json())
-        .then((data) => {
-          resolve(parseTides(data, date));
-        });
-    });
+    return fetch(url)
+      .then((resp) => resp.json())
+      .then((data) => parseTides(data, date));
 
     function parseTides(data, date) {
       const tides = data.predictions;
@@ -85,25 +81,3 @@ export { tidesModule };
 function pad(n) {
   return n < 10 ? '0' + n : n;
 }
-
-// Deprecated
-
-/*
-
-
-  function getStations() {
-    return new Promise((resolve, reject) => {
-      const url = [
-        'https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?',
-        'type=tidepredictions',
-      ].join('&');
-
-      fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-          resolve(data.stations);
-        });
-    });
-  }
-
-*/

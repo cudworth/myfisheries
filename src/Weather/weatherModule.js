@@ -1,35 +1,43 @@
+/*
+Weather module for asynchronously retrieving daily weather
+predictions for a given date, latitude, and longitude.
+Data provided by weather.gov
+*/
+
 function weatherModule() {
   function getForecast(date, lat, lng) {
-    return new Promise((resolve, reject) => {
-      if (!isWeatherAvailable(date)) {
-        resolve(null);
-      } else {
-        const parseCoord = (float) => Math.round(float * 10000) / 10000;
+    if (!isWeatherAvailable(date)) {
+      return Promise.reject(null);
+    }
 
-        const weatherGovUrl = [
-          'https://api.weather.gov/points/',
-          `${parseCoord(lat)},`,
-          `${parseCoord(lng)}`,
-        ].join('');
+    const parseCoord = (float) => Math.round(float * 10000) / 10000;
 
-        fetch(weatherGovUrl)
+    const weatherGovUrl = [
+      'https://api.weather.gov/points/',
+      `${parseCoord(lat)},`,
+      `${parseCoord(lng)}`,
+    ].join('');
+
+    return fetch(weatherGovUrl)
+      .then((response) => {
+        if (response.status !== 200) {
+          return Promise.reject(new Error(response));
+        } else {
+          return response.json();
+        }
+      })
+      .then((data) => {
+        const forecastUrl = data.properties.forecast;
+        return fetch(forecastUrl)
           .then((response) => {
-            //if (response.status !== 200) reject(null);
-            return response.json();
+            if (response.status !== 200) {
+              return Promise.reject(new Error(response));
+            } else {
+              return response.json();
+            }
           })
-          .then((data) => {
-            const forecastUrl = data.properties.forecast;
-            fetch(forecastUrl)
-              .then((response) => response.json())
-              .then((data) =>
-                resolve(getForecastForDate(date, data.properties.periods))
-              );
-          })
-          .catch(() => {
-            reject('Failed to retrieve forecast data');
-          });
-      }
-    });
+          .then((data) => getForecastForDate(date, data.properties.periods));
+      });
   }
 
   function getForecastForDate(date, data) {
@@ -41,11 +49,18 @@ function weatherModule() {
     nextDate.setDate(1 + nextDate.getDate());
     const forecast = data.find((elem) => {
       const elemDate = new Date(elem.startTime);
-      return elem.isDaytime && date <= elemDate && elemDate <= nextDate
-        ? true
-        : false;
+      return date <= elemDate && elemDate <= nextDate ? true : false;
     });
-    return forecast;
+    return parseForecast(forecast);
+  }
+
+  function parseForecast(obj) {
+    return {
+      icon: obj.icon,
+      forecast: obj.shortForecast,
+      temperature: `${obj.temperature} ${obj.temperatureUnit}`,
+      wind: `${obj.windSpeed} ${obj.windDirection}`,
+    };
   }
 
   return { getForecast };

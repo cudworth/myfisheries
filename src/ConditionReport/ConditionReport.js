@@ -31,17 +31,40 @@ function ConditionReport(props) {
       myWeather
         .getForecast(date, tideStation.lat, tideStation.lng)
         .then((data) => {
-          console.log('forecast data: ', data);
           setStateHelper({ weather: data });
+        })
+        .catch((resp) => {
+          setStateHelper({ weather: null });
         });
-    }
 
-    /*
       myTides.getTide(tideStation, date).then((data) => {
         setStateHelper({ tides: data });
       });
-      */
+    }
   }, [tideStation, date]);
+
+  function renderWeatherForecast() {
+    if (tideStation && state.weather) {
+      const { weather } = state;
+      return (
+        <div className="WeatherForecast">
+          <div>Weather Report</div>
+          <img src={weather.icon} alt="icon" />
+          <div>{weather.forecast}</div>
+          <div>{weather.temperature}</div>
+          <div>{weather.wind}</div>
+        </div>
+      );
+    } else if (tideStation && !state.weather) {
+      return (
+        <div className="WeatherForecast">
+          <div>
+            Weather forecast is not available for the selected station and date.
+          </div>
+        </div>
+      );
+    }
+  }
 
   function renderTidesReport() {
     function deltaCard(arr, i) {
@@ -86,22 +109,10 @@ function ConditionReport(props) {
 
   return (
     <div>
-      <div>Weather Report</div>
+      {renderWeatherForecast()}
       {renderTidesReport()}
-      <div></div>
     </div>
   );
 }
 
 export default ConditionReport;
-
-/*
-const [lat, lng] = [47.608013, -122.335167];
-
-//myWeather.getWeather(lat, lng);
-
-
-myTides
-  .getTides(9447130, new Date(2021, 1, 11))
-  .then((data) => console.log(data));
-*/
