@@ -1,70 +1,64 @@
-import { openWeatherKey } from '../private';
-//import { parseCurrentWeather, parseDailyWeather } from './weatherLibrary';
-
 function weatherModule() {
-  function getWeather(lat, lon) {
+  function getForecast(date, lat, lng) {
     return new Promise((resolve, reject) => {
-      const url = [
-        'https://api.openweathermap.org/data/2.5/onecall?',
-        `lat=${lat}`,
-        `lon=${lon}`,
-        `appid=${openWeatherKey}`,
-        'exclude=current,minutely,hourly,alerts',
-        'units=imperial',
-      ].join('&');
+      if (!isWeatherAvailable(date)) {
+        resolve(null);
+      } else {
+        const parseCoord = (float) => Math.round(float * 10000) / 10000;
 
-      fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          resolve('success');
-        })
-        .catch(() => {
-          reject('Failed to retrieve forecast data from OpenWeatherMap');
-        });
+        const weatherGovUrl = [
+          'https://api.weather.gov/points/',
+          `${parseCoord(lat)},`,
+          `${parseCoord(lng)}`,
+        ].join('');
+
+        fetch(weatherGovUrl)
+          .then((response) => {
+            //if (response.status !== 200) reject(null);
+            return response.json();
+          })
+          .then((data) => {
+            const forecastUrl = data.properties.forecast;
+            fetch(forecastUrl)
+              .then((response) => response.json())
+              .then((data) =>
+                resolve(getForecastForDate(date, data.properties.periods))
+              );
+          })
+          .catch(() => {
+            reject('Failed to retrieve forecast data');
+          });
+      }
     });
   }
 
-  /*
-  function renderWeather(data) {
-    const current = parseCurrentWeather(data.current);
-
-    const tempUnit = () => (imperialRadio.checked ? 'F' : 'C');
-    const speedUnit = () => (imperialRadio.checked ? 'mph' : 'km/h');
-
-    document.getElementById('weather').innerText = `${current.weather}, ${
-      current.temp
-    } ${tempUnit()}`;
-    document.getElementById('wind').innerText = `${
-      current.windSpeed
-    } ${speedUnit()} ${current.windDirection} wind`;
-
-    const iconUrl = `http://openweathermap.org/img/wn/${current.icon}@2x.png`;
-    document.getElementById(`icon`).setAttribute('src', iconUrl);
-  }
-
-  function renderForecast(data) {
-    const forecast = data.daily.map((obj) => {
-      return parseDailyWeather(obj);
+  function getForecastForDate(date, data) {
+    const nextDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+    nextDate.setDate(1 + nextDate.getDate());
+    const forecast = data.find((elem) => {
+      const elemDate = new Date(elem.startTime);
+      return elem.isDaytime && date <= elemDate && elemDate <= nextDate
+        ? true
+        : false;
     });
-
-    const tempUnit = () => (imperialRadio.checked ? 'F' : 'C');
-
-    function setDaily(i, data) {
-      document.getElementById(`d${i}-date`).innerText = `${data.date}`;
-      document.getElementById(`d${i}-weather`).innerText = `${data.weather}, ${
-        data.temp_max
-      } ${tempUnit()} / ${data.temp_min} ${tempUnit()}`;
-
-      const iconUrl = `http://openweathermap.org/img/wn/${data.icon}@2x.png`;
-      document.getElementById(`d${i}-icon`).setAttribute('src', iconUrl);
-    }
-
-    forecast.slice(0, 3).forEach((day, index) => setDaily(index, day));
+    return forecast;
   }
-  */
 
-  return { getWeather };
+  return { getForecast };
 }
 
 export { weatherModule };
+
+// Private
+
+function isWeatherAvailable(date) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  end.setDate(6 + end.getDate());
+  return start <= date && date <= end ? true : false;
+}

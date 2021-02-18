@@ -7,7 +7,7 @@ const myWeather = weatherModule();
 const myTides = tidesModule();
 
 const defaultState = {
-  weather: {},
+  weather: null,
   tides: null,
   riverFlows: {},
 };
@@ -28,10 +28,19 @@ function ConditionReport(props) {
 
   useEffect(() => {
     if (tideStation) {
-      myTides.getTide(tideStation, date).then((tideData) => {
-        setStateHelper({ tides: tideData });
-      });
+      myWeather
+        .getForecast(date, tideStation.lat, tideStation.lng)
+        .then((data) => {
+          console.log('forecast data: ', data);
+          setStateHelper({ weather: data });
+        });
     }
+
+    /*
+      myTides.getTide(tideStation, date).then((data) => {
+        setStateHelper({ tides: data });
+      });
+      */
   }, [tideStation, date]);
 
   function renderTidesReport() {
@@ -79,7 +88,7 @@ function ConditionReport(props) {
     <div>
       <div>Weather Report</div>
       {renderTidesReport()}
-      <div>River Flows</div>
+      <div></div>
     </div>
   );
 }
