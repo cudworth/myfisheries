@@ -37,6 +37,9 @@ function weatherModule() {
             }
           })
           .then((data) => getForecastForDate(date, data.properties.periods));
+      })
+      .catch((reason) => {
+        return Promise.reject(reason);
       });
   }
 
@@ -59,7 +62,7 @@ function weatherModule() {
       icon: obj.icon,
       forecast: obj.shortForecast,
       temperature: `${obj.temperature} ${obj.temperatureUnit}`,
-      wind: `${obj.windSpeed} ${obj.windDirection}`,
+      wind: `${obj.windSpeed} ${obj.windDirection} Wind`,
     };
   }
 

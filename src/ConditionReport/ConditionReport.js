@@ -33,7 +33,7 @@ function ConditionReport(props) {
         .then((data) => {
           setStateHelper({ weather: data });
         })
-        .catch((resp) => {
+        .catch(() => {
           setStateHelper({ weather: null });
         });
 
@@ -43,24 +43,46 @@ function ConditionReport(props) {
     }
   }, [tideStation, date]);
 
+  function renderStation() {
+    if (tideStation) {
+      return (
+        <div>
+          <h1>{`${tideStation.name}`}</h1>
+        </div>
+      );
+    }
+  }
+
+  function renderDate() {
+    if (tideStation) {
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      };
+      return (
+        <div>
+          <h2>{date.toLocaleString('en-US', options)}</h2>
+        </div>
+      );
+    }
+  }
+
   function renderWeatherForecast() {
     if (tideStation && state.weather) {
       const { weather } = state;
       return (
         <div className="WeatherForecast">
-          <div>Weather Report</div>
-          <img src={weather.icon} alt="icon" />
-          <div>{weather.forecast}</div>
-          <div>{weather.temperature}</div>
-          <div>{weather.wind}</div>
+          <div className="WeatherForecast-container">
+            {`${weather.forecast}, ${weather.temperature}, ${weather.wind}`}
+          </div>
         </div>
       );
     } else if (tideStation && !state.weather) {
       return (
         <div className="WeatherForecast">
-          <div>
-            Weather forecast is not available for the selected station and date.
-          </div>
+          <h3>Forecast Not Available</h3>
         </div>
       );
     }
@@ -109,6 +131,8 @@ function ConditionReport(props) {
 
   return (
     <div>
+      {renderStation()}
+      {renderDate()}
       {renderWeatherForecast()}
       {renderTidesReport()}
     </div>

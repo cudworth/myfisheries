@@ -29,7 +29,10 @@ function tidesModule() {
 
     return fetch(url)
       .then((resp) => resp.json())
-      .then((data) => parseTides(data, date));
+      .then((data) => parseTides(data, date))
+      .catch((reason) => {
+        return Promise.reject(reason);
+      });
 
     function parseTides(data, date) {
       const tides = data.predictions;

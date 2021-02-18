@@ -1,3 +1,18 @@
+.WeatherForecast {
+  background-color: hotpink;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.WeatherForecast-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .ConditionReport {
   background-color: chartreuse;
 }
