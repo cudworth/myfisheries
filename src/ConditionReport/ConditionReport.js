@@ -29,7 +29,7 @@ function ConditionReport(props) {
   useEffect(() => {
     if (tideStation) {
       myWeather
-        .getForecast(date, tideStation.lat, tideStation.lng)
+        .getForecast(date, tideStation.t, tideStation.n)
         .then((data) => {
           setStateHelper({ weather: data });
         })
@@ -47,7 +47,7 @@ function ConditionReport(props) {
     if (tideStation) {
       return (
         <div>
-          <h1>{`${tideStation.name}`}</h1>
+          <h1>{`${tideStation.i}`}</h1>
         </div>
       );
     }

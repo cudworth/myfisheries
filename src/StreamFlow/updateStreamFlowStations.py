@@ -22,24 +22,24 @@ for state in states:
 
     if r.status_code == 200:
 
-        data = r.json()
+        stateData = r.json()
 
-        for item in data['value']['timeSeries']:
-            info = item['sourceInfo']
+        for site in stateData['value']['timeSeries']:
+            info = site['sourceInfo']
             obj = {}
-            # obj['name'] = info['siteName']
-            obj['lat'] = round(info['geoLocation']
-                               ['geogLocation']['latitude'] * 10000) / 10000.0
-            obj['lng'] = round(info['geoLocation']
-                               ['geogLocation']['longitude'] * 10000) / 10000.0
-            obj['uid'] = info['siteCode'][0]['agencyCode'] + \
+            obj['i'] = info['siteCode'][0]['agencyCode'] + \
                 ':' + info['siteCode'][0]['value']
+            obj['t'] = round(info['geoLocation']
+                             ['geogLocation']['latitude'] * 1000) / 1000.0
+            obj['n'] = round(info['geoLocation']
+                             ['geogLocation']['longitude'] * 1000) / 1000.0
+
             arr.append(obj)
 
         print(state)
+
     else:
         print('retrieval for state code ' + state + ' failed')
-
 
 with open(fileName, 'w') as f:
     json.dump(arr, f)

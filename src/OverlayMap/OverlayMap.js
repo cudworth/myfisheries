@@ -5,8 +5,6 @@ import tideStations from '../Tides/tideStations.json';
 import streamFlowStations from '../StreamFlow/streamFlowStations.json';
 import { googleMapsKey } from '../private';
 
-console.log(streamFlowStations);
-
 /* global google */
 
 const defaultState = { isMapLoaded: false };
@@ -65,10 +63,10 @@ function OverlayMap(props) {
   }
 
   function addTideStationMarkers() {
-    tideStations.stations.forEach((station) => {
+    tideStations.forEach((station) => {
       const marker = new google.maps.Marker({
-        position: { lat: station.lat, lng: station.lng },
-        title: station.name,
+        position: { lat: station.t, lng: station.n },
+        title: station.i,
       });
 
       marker.setMap(mapRef.current);

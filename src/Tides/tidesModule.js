@@ -16,7 +16,7 @@ function tidesModule() {
 
     const url = [
       'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?',
-      `station=${station.id}`,
+      `station=${station.i}`,
       'format=json',
       'units=english',
       'time_zone=lst_ldt',
