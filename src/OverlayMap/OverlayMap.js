@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
 import tideStations from '../Tides/tideStations.json';
@@ -7,36 +7,15 @@ import { googleMapsKey } from '../private';
 
 /* global google */
 
-//const defaultState = { didMapIdle: false, didMapBoundsChange: false };
-
 function OverlayMap(props) {
-  const {
-    location,
-    onMapLoad,
-    onTideStationClick,
-    onStreamFlowStationClick,
-  } = props;
-
-  //const [state, setState] = useState({ ...defaultState });
+  const { location, onTideStationClick, onStreamFlowStationClick } = props;
 
   const ref = useRef({
-    map: {},
+    map: null,
+    geocoder: null,
     activeStations: {},
     renderCount: 0,
-    didMapBoundsChange: false,
   });
-
-  /*
-  function setStateHelper(obj) {
-    setState((prev) => {
-      const next = { ...prev };
-      Object.keys(obj).forEach((key) => {
-        next[key] = obj[key];
-      });
-      return next;
-    });
-  }
-  */
 
   useEffect(() => {
     const myLoader = new Loader({
@@ -48,37 +27,33 @@ function OverlayMap(props) {
       ref.current.map = new google.maps.Map(
         document.getElementById('overlay-map'),
         {
+          center: { lat: 47.2528768, lng: -122.4442906 },
+          zoom: 10,
           minZoom: 10,
           fullscreenControl: false,
           streetViewControl: false,
           mapTypeControl: false,
         }
       );
-      ref.current.map.addListener('bounds_changed', () => {
-        ref.current.didMapBoundsChange = true;
-        console.log('bound change registered');
-      });
+
       ref.current.map.addListener('idle', () => {
         console.log('idle registered');
-        if (ref.current.didMapBoundsChange && ref.current.map.getBounds()) {
-          ref.current.didMapBoundsChange = false;
-          updateStationMarkers();
-        }
+        updateStationMarkers();
       });
 
-      onMapLoad();
+      ref.current.geocoder = new google.maps.Geocoder();
     });
   }, []);
 
   useEffect(() => {
     if (location) {
+      console.log('MapTo effect triggered');
       mapTo(location);
     }
   }, [location]);
 
   function mapTo(query) {
-    const myGeocoder = new google.maps.Geocoder();
-    myGeocoder.geocode(
+    ref.current.geocoder.geocode(
       {
         address: query,
       },
@@ -107,7 +82,6 @@ function OverlayMap(props) {
   function updateStationMarkers() {
     const { map, activeStations } = ref.current;
     const bounds = map.getBounds();
-    console.log('bounds: ', bounds);
     const prevKeys = Object.keys(activeStations);
 
     // Add tide & stream flow markers within map bounds

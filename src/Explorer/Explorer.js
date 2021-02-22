@@ -5,7 +5,7 @@ import ConditionReport from '../ConditionReport/ConditionReport';
 
 const defaultState = {
   location: null,
-  inputText: '',
+  inputText: null,
   htmlDate: getHtmlDate(),
   date: getDate(),
   tideStation: null,
@@ -61,9 +61,6 @@ function Explorer(props) {
       </form>
       <OverlayMap
         location={state.location}
-        onMapLoad={() => {
-          setStateHelper({ location: 'Tacoma, WA' });
-        }}
         onTideStationClick={(tideStation) => setStateHelper({ tideStation })}
         onStreamFlowStationClick={(streamFlowStation) =>
           setStateHelper({ streamFlowStation })
