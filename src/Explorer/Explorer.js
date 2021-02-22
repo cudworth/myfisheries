@@ -4,11 +4,12 @@ import OverlayMap from '../OverlayMap/OverlayMap';
 import ConditionReport from '../ConditionReport/ConditionReport';
 
 const defaultState = {
-  location: 'Tacoma, WA',
+  location: null,
   inputText: '',
   htmlDate: getHtmlDate(),
   date: getDate(),
   tideStation: null,
+  streamFlowStation: null,
 };
 
 function Explorer(props) {
@@ -60,7 +61,13 @@ function Explorer(props) {
       </form>
       <OverlayMap
         location={state.location}
+        onMapLoad={() => {
+          setStateHelper({ location: 'Tacoma, WA' });
+        }}
         onTideStationClick={(tideStation) => setStateHelper({ tideStation })}
+        onStreamFlowStationClick={(streamFlowStation) =>
+          setStateHelper({ streamFlowStation })
+        }
       />
       <ConditionReport tideStation={state.tideStation} date={state.date} />
     </div>
