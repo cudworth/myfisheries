@@ -14,7 +14,6 @@ function OverlayMap(props) {
     map: null,
     geocoder: null,
     activeStations: {},
-    renderCount: 0,
   });
 
   useEffect(() => {
@@ -37,7 +36,6 @@ function OverlayMap(props) {
       );
 
       ref.current.map.addListener('idle', () => {
-        console.log('idle registered');
         updateStationMarkers();
       });
 
@@ -79,7 +77,93 @@ function OverlayMap(props) {
     return Object.keys(ref.current.activeStations).includes(key);
   }
 
+  function sortStationsByProximity(stations) {
+    const center = ref.current.map.getCenter();
+    const [t, n] = [center.lat(), center.lng()];
+
+    // temporary array holds objects with position and sort-value
+    const mapped = stations.map((station, index) => {
+      return { i: index, v: (station.t - t) ** 2 + (station.n - n) ** 2 };
+    });
+
+    // sorting the mapped array containing the reduced values
+    mapped.sort(function (a, b) {
+      return a.v - b.v;
+    });
+
+    // container for the resulting order
+    return mapped.map((elem) => {
+      return stations[elem.i];
+    });
+  }
+
+  function purgeMarkers() {
+    const bounds = ref.current.map.getBounds();
+    Object.keys(ref.current.activeStations).forEach((key) => {
+      const { s, m } = ref.current.activeStations[key];
+      if (!isStationInBounds(bounds, s)) {
+        m.setMap(null);
+        delete ref.current.activeStations[key];
+      }
+    });
+  }
+
+  function addMarkers(stationList, onClick) {
+    const bounds = ref.current.map.getBounds();
+    for (let i = 0; i < stationList.length; i++) {
+      const s = stationList[i];
+      const key = `q${s.i}`;
+      if (isStationInBounds(bounds, s)) {
+        if (!isStationActive(key)) {
+          const m = new google.maps.Marker({
+            position: { lat: s.t, lng: s.n },
+          });
+          m.addListener('click', () => {
+            onClick(s);
+          });
+          m.setMap(ref.current.map);
+          ref.current.activeStations[key] = { s, m };
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
   function updateStationMarkers() {
+    const sortedTideStations = sortStationsByProximity(tideStations);
+    const sortedStreamFlowStations = sortStationsByProximity(
+      streamFlowStations
+    );
+
+    //remove all currently attached stations
+    purgeMarkers();
+
+    // Add tide & stream flow markers within map bounds
+    addMarkers(sortedTideStations, onTideStationClick);
+    addMarkers(sortedStreamFlowStations, onStreamFlowStationClick);
+  }
+
+  return <div id="overlay-map" className="overlay-map"></div>;
+}
+
+export default OverlayMap;
+
+/*
+
+  function isStationInBounds(bounds, station) {
+    const [bLat, bLng] = [bounds.Wa, bounds.Qa];
+    const [sLat, sLng] = [station.t, station.n];
+    return bLat.i < sLat && sLat < bLat.j && bLng.i < sLng && sLng < bLng.j
+      ? true
+      : false;
+  }
+
+  function isStationActive(key) {
+    return Object.keys(ref.current.activeStations).includes(key);
+  }
+
+function updateStationMarkers() {
     const { map, activeStations } = ref.current;
     const bounds = map.getBounds();
     const prevKeys = Object.keys(activeStations);
@@ -125,9 +209,4 @@ function OverlayMap(props) {
     });
   }
 
-  ref.current.renderCount++;
-  console.log('render count: ', ref.current.renderCount);
-  return <div id="overlay-map" className="overlay-map"></div>;
-}
-
-export default OverlayMap;
+*/
