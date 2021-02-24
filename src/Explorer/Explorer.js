@@ -4,7 +4,7 @@ import OverlayMap from '../OverlayMap/OverlayMap';
 import ConditionReport from '../ConditionReport/ConditionReport';
 
 const defaultState = {
-  location: null,
+  location: '',
   inputText: null,
   htmlDate: getHtmlDate(),
   date: getDate(),
