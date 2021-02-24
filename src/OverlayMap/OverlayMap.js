@@ -13,7 +13,7 @@ function OverlayMap(props) {
   const ref = useRef({
     map: null,
     geocoder: null,
-    activeStations: {},
+    activeMarkers: [],
   });
 
   useEffect(() => {
@@ -65,60 +65,28 @@ function OverlayMap(props) {
     );
   }
 
-  function isStationInBounds(bounds, station) {
-    const [bLat, bLng] = [bounds.Wa, bounds.Qa];
-    const [sLat, sLng] = [station.t, station.n];
-    return bLat.i < sLat && sLat < bLat.j && bLng.i < sLng && sLng < bLng.j
-      ? true
-      : false;
-  }
-
-  function isStationInRadius(bounds, radius) {
-    const [lat, lng] = [bounds.Wa, bounds.Qa];
-    const maxRadius = Math.floor(
-      (((lat.j - lat.i) / 2) ** 2 + ((lng.j - lng.i) / 2) ** 2) * 1000
-    );
-    return radius < maxRadius;
-  }
-
-  function isStationActive(key) {
-    return Object.keys(ref.current.activeStations).includes(key);
-  }
-
-  function sortStationsByProximity(stations, ctrLat, ctrLng) {
-    const mapped = stations.map((station, index) => {
-      return {
-        index,
-        radius: Math.floor(
-          ((station.t - ctrLat) ** 2 + (station.n - ctrLng) ** 2) * 1000
-        ),
-      };
+  function purgeMarkers() {
+    ref.current.activeMarkers.forEach((marker) => {
+      marker.setMap(null);
     });
-
-    mapped.sort((a, b) => a.radius - b.radius);
-
-    return mapped.map((elem) => {
-      return { station: stations[elem.index], radius: elem.radius };
-    });
+    ref.current.activeMarkers.length = 0;
   }
 
-  function purgeMarkers(bounds) {
-    Object.keys(ref.current.activeStations).forEach((key) => {
-      const { marker, radius } = ref.current.activeStations[key];
-      if (!isStationInRadius(bounds, radius)) {
-        marker.setMap(null);
-        delete ref.current.activeStations[key];
-      }
-    });
-  }
+  function updateStationMarkers() {
+    const bounds = ref.current.map.getBounds();
+    const [boundLat, boundLng] = [bounds.Wa, bounds.Qa];
+    const center = ref.current.map.getCenter();
+    const [centerLat, centerLng] = [center.lat(), center.lng()];
 
-  function addMarkers(bounds, stationList, onClick) {
-    for (let i = 0; i < stationList.length; i++) {
-      const { station, radius } = stationList[i];
+    const maxRadius =
+      ((boundLat.j - boundLat.i) / 2) ** 2 +
+      ((boundLng.j - boundLng.i) / 2) ** 2;
 
-      const key = `q${station.i}`;
-      if (isStationInRadius(bounds, radius)) {
-        if (!isStationActive(key)) {
+    function addMarkers(stationList, onClick) {
+      stationList.forEach((station) => {
+        const radius =
+          (station.t - centerLat) ** 2 + (station.n - centerLng) ** 2;
+        if (radius < maxRadius) {
           const marker = new google.maps.Marker({
             position: { lat: station.t, lng: station.n },
           });
@@ -126,34 +94,15 @@ function OverlayMap(props) {
             onClick(station);
           });
           marker.setMap(ref.current.map);
-          ref.current.activeStations[key] = { station, marker, radius };
+          ref.current.activeMarkers.push(marker);
         }
-      } else {
-        break;
-      }
+      });
     }
-  }
 
-  function updateStationMarkers() {
-    const bounds = ref.current.map.getBounds();
-    const center = ref.current.map.getCenter();
-    const [centerLat, centerLng] = [center.lat(), center.lng()];
+    purgeMarkers();
 
-    const sortedTideStations = sortStationsByProximity(
-      tideStations,
-      centerLat,
-      centerLng
-    );
-    const sortedStreamFlowStations = sortStationsByProximity(
-      streamFlowStations,
-      centerLat,
-      centerLng
-    );
-
-    purgeMarkers(bounds);
-
-    addMarkers(bounds, sortedTideStations, onTideStationClick);
-    addMarkers(bounds, sortedStreamFlowStations, onStreamFlowStationClick);
+    addMarkers(tideStations, onTideStationClick);
+    addMarkers(streamFlowStations, onStreamFlowStationClick);
   }
   return <div id="overlay-map" className="overlay-map"></div>;
 }
