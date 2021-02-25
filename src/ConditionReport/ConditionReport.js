@@ -2,9 +2,13 @@ import './ConditionReport.css';
 import { useEffect, useState } from 'react';
 import { weatherModule } from '../Weather/weatherModule';
 import { tidesModule } from '../Tides/tidesModule';
+import { streamFlowModule } from '../StreamFlow/streamFlowModule';
 
 const myWeather = weatherModule();
 const myTides = tidesModule();
+const myStreamFlow = streamFlowModule();
+
+myStreamFlow.getStreamFlow({ i: 'USGS:02339495' });
 
 const defaultState = {
   weather: null,
