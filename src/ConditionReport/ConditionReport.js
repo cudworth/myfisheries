@@ -8,7 +8,8 @@ const myWeather = weatherModule();
 const myTides = tidesModule();
 const myStreamFlow = streamFlowModule();
 
-myStreamFlow.getStreamFlow({ i: 'USGS:02339495' });
+//myStreamFlow.getStreamFlow({ i: 'USGS:02339495' });
+myStreamFlow.getStatisticalStreamFlow({ i: 'USGS:02339495' });
 
 const defaultState = {
   weather: null,
