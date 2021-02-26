@@ -32,7 +32,7 @@ function streamFlowModule() {
     return fetch(url)
       .then((resp) => resp.text())
       .then((text) => {
-        console.log(text);
+        console.log(parseStatisticalStreamFlow(text));
       })
       .catch((err) => {
         return Promise.reject(err);
@@ -45,6 +45,28 @@ function streamFlowModule() {
     const { value } = timeSeries.values[0].value[0];
     const { unitCode } = timeSeries.variable.unit;
     return { timeSeries, siteName, value, unitCode };
+  }
+
+  function parseStatisticalStreamFlow(text) {
+    const textLines = text.split('\n');
+    const rawData = [];
+    textLines.forEach((textLine) => {
+      const items = textLine.split('\t');
+      if (10 < items.length) {
+        rawData.push(items);
+      }
+    });
+    const keys = rawData[0];
+    const collection = [];
+    for (let i = 1; i < rawData.length; i++) {
+      //start on line #2, #1 is not useful data
+      const dailyInfo = {};
+      keys.forEach((key, index) => {
+        dailyInfo[key] = rawData[i][index];
+      });
+      collection.push(dailyInfo);
+    }
+    return collection;
   }
 
   return { getStreamFlow, getStatisticalStreamFlow };
