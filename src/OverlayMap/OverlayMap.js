@@ -36,7 +36,7 @@ function OverlayMap(props) {
       );
 
       ref.current.map.addListener('idle', () => {
-        updateStationMarkers();
+        updateMarkers();
       });
 
       ref.current.geocoder = new google.maps.Geocoder();
@@ -72,15 +72,21 @@ function OverlayMap(props) {
     ref.current.activeMarkers.length = 0;
   }
 
-  function updateStationMarkers() {
+  function updateMarkers() {
     const bounds = ref.current.map.getBounds();
-    const [boundLat, boundLng] = [bounds.Wa, bounds.Qa];
+    const southWest = bounds.getSouthWest();
+    const northEast = bounds.getNorthEast();
     const center = ref.current.map.getCenter();
     const [centerLat, centerLng] = [center.lat(), center.lng()];
 
     const maxRadius =
-      ((boundLat.j - boundLat.i) / 2) ** 2 +
-      ((boundLng.j - boundLng.i) / 2) ** 2;
+      ((northEast.lat() - southWest.lat()) / 2) ** 2 +
+      ((northEast.lng() - southWest.lng()) / 2) ** 2;
+
+    purgeMarkers();
+
+    addMarkers(tideStations, onTideStationClick);
+    addMarkers(streamFlowStations, onStreamFlowStationClick);
 
     function addMarkers(stationList, onClick) {
       stationList.forEach((station) => {
@@ -98,11 +104,6 @@ function OverlayMap(props) {
         }
       });
     }
-
-    purgeMarkers();
-
-    addMarkers(tideStations, onTideStationClick);
-    addMarkers(streamFlowStations, onStreamFlowStationClick);
   }
   return <div id="overlay-map" className="overlay-map"></div>;
 }
