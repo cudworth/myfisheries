@@ -32,7 +32,8 @@ function streamFlowModule() {
     return fetch(url)
       .then((resp) => resp.text())
       .then((text) => {
-        console.log(parseStatisticalStreamFlow(text));
+        const parsedData = parseStatisticalStreamFlow(text);
+        console.log(getStatsOnDate(parsedData, date));
       })
       .catch((err) => {
         return Promise.reject(err);
@@ -67,6 +68,17 @@ function streamFlowModule() {
       collection.push(dailyInfo);
     }
     return collection;
+  }
+
+  function getStatsOnDate(data, date) {
+    const monthNum = date.getMonth() + 1;
+    const dayNum = date.getDay();
+    return data.find((obj, index) => {
+      return parseFloat(obj.day_nu) === dayNum &&
+        parseFloat(obj.month_nu) === monthNum
+        ? true
+        : false;
+    });
   }
 
   return { getStreamFlow, getStatisticalStreamFlow };
