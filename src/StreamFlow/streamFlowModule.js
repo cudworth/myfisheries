@@ -72,70 +72,87 @@ function streamFlowModule() {
   function getStreamFlow(station, date = new Date()) {
     Promise.all([getUsgsInst(station), getUsgsStat(station)])
       .then(([inst, stat]) => {
-        console.log('instantaneous: ', inst);
-        console.log('statistics: ', stat);
-        console.log(processData(inst, stat, date));
+        const processed = processData(inst, stat, date);
+        console.log('processed streamflow data: ', processed);
+        return processed;
       })
       .catch((err) => console.log('Error at getStreamFlow: ', err));
   }
 
-  function processData(instData, statData, date) {
-    /*
-    - Current flow
-    - Annual maximum flow
-    - Annual minimum flow
-    - Percent of mean daily flow
-    - Percentile of annual stream flows
-    */
+  function processData(inst, stat, queryDate) {
+    const today = new Date();
+    const [todayMonth, todayDay] = [today.getMonth() + 1, today.getDate()];
 
-    const dayStats = getDailyStats(statData, date);
-    const yearStats = getAnnualStats(statData, instData.value);
+    const [queryMonth, queryDay] = [
+      queryDate.getMonth() + 1,
+      queryDate.getDate(),
+    ];
 
-    let annualMax, annualMin, annualPercentile;
+    const instFlow = parseFloat(inst.value);
 
-    return {
-      currentFlow: `${instData.value} ${instData.unitCode}`,
-      percentDailyP50: `${Math.round(
-        (instData.value / dayStats.p50_va) * 100
-      )}% median daily flow`,
-      annualMax: `${yearStats.annualMaxP50} cfs`,
-      annualMin: `${yearStats.annualMinP50} cfs`,
-      annualPercentile: `${yearStats.percentileAnnualP50}% annual median range`,
-    };
-  }
+    let nLessThanInst = 0,
+      nEqualToInst = 0,
+      nLessThanToday = 0,
+      nEqualToToday = 0,
+      nLessThanQuery = 0,
+      nEqualToQuery = 0,
+      annualMinFlow = Infinity,
+      annualMaxFlow = -Infinity,
+      todayData = null,
+      queryData = null;
 
-  function getDailyStats(data, date) {
-    const monthNum = date.getMonth() + 1;
-    const dayNum = date.getDate();
-    return data.find((obj) => {
-      return parseInt(obj.day_nu) === dayNum &&
-        parseInt(obj.month_nu) === monthNum
-        ? true
-        : false;
-    });
-  }
-
-  function getAnnualStats(data, instFlow) {
-    const flow = parseFloat(instFlow);
-    let nLess = 0,
-      nEq = 0,
-      min = Infinity,
-      max = -Infinity;
-
-    data.forEach((obj) => {
-      const refFlow = parseFloat(obj.p50_va);
-      if (min > refFlow) min = refFlow;
-      if (max < refFlow) max = refFlow;
-      if (refFlow < flow) nLess += 1;
-      if (refFlow === flow) nEq += 1;
+    stat.forEach((obj) => {
+      const dayNum = parseInt(obj.day_nu);
+      const monthNum = parseInt(obj.month_nu);
+      if (dayNum === todayDay && monthNum === todayMonth) todayData = obj;
+      if (dayNum === queryDay && monthNum === queryMonth) queryData = obj;
     });
 
-    const percentile = Math.round(((nLess + nEq / 2) / data.length) * 100);
+    const todaysDateFlow = parseFloat(todayData.p50_va);
+    const queryDateFlow = parseFloat(queryData.p50_va);
 
+    stat.forEach((obj) => {
+      const historicMedian = parseFloat(obj.p50_va);
+
+      if (annualMinFlow > historicMedian) annualMinFlow = historicMedian;
+      if (annualMaxFlow < historicMedian) annualMaxFlow = historicMedian;
+
+      if (historicMedian < instFlow) nLessThanInst += 1;
+      if (historicMedian === instFlow) nEqualToInst += 1;
+
+      if (historicMedian < todaysDateFlow) nLessThanToday += 1;
+      if (historicMedian === todaysDateFlow) nEqualToToday += 1;
+
+      if (historicMedian < queryDateFlow) nLessThanQuery += 1;
+      if (historicMedian === queryDateFlow) nEqualToQuery += 1;
+    });
+
+    const instPercentDailyFlow = Math.round((instFlow / todaysDateFlow) * 100);
+
+    const instPercentile = Math.round(
+      ((nLessThanInst + nEqualToInst / 2) / stat.length) * 100
+    );
+
+    const todayPercentile = Math.round(
+      ((nLessThanToday + nEqualToToday / 2) / stat.length) * 100
+    );
+
+    const queryPercentile = Math.round(
+      ((nLessThanQuery + nEqualToQuery / 2) / stat.length) * 100
+    );
+
+    //NOTE ALL DATA RETURNED IS W.R.T. TO STATISTICAL MEDIAN FLOWRATES
     return {
-      annualMinP50: min,
-      annualMaxP50: max,
-      percentileAnnualP50: percentile,
+      siteName: `${inst.siteName}`,
+      instFlow: `${instFlow} cfs`,
+      instPercentDailyFlow: `${instPercentDailyFlow}%`,
+      instPercentileAnnual: `${instPercentile} percentile`,
+      todaysDateFlow: `${todaysDateFlow} cfs`,
+      todaysDatePercentileAnnual: `${todayPercentile} percentile`,
+      queryDateFlow: `${queryDateFlow} cfs`,
+      queryDatePercentileAnnual: `${queryPercentile} percentile`,
+      annualMinFlow: `${annualMinFlow} cfs`,
+      annualMaxFlow: `${annualMaxFlow} cfs`,
     };
   }
 
