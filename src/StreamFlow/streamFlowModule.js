@@ -70,12 +70,8 @@ function streamFlowModule() {
   }
 
   function getStreamFlow(station, date = new Date()) {
-    Promise.all([getUsgsInst(station), getUsgsStat(station)])
-      .then(([inst, stat]) => {
-        const processed = processData(inst, stat, date);
-        console.log('processed streamflow data: ', processed);
-        return processed;
-      })
+    return Promise.all([getUsgsInst(station), getUsgsStat(station)])
+      .then(([inst, stat]) => processData(inst, stat, date))
       .catch((err) => console.log('Error at getStreamFlow: ', err));
   }
 

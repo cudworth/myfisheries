@@ -8,17 +8,14 @@ const myWeather = weatherModule();
 const myTides = tidesModule();
 const myStreamFlow = streamFlowModule();
 
-myStreamFlow.getStreamFlow({ i: 'USGS:02339495' });
-//myStreamFlow.getStatisticalStreamFlow({ i: 'USGS:02339495' }, new Date());
-
 const defaultState = {
-  weather: null,
-  tides: null,
-  riverFlows: {},
+  weatherData: null,
+  tideData: null,
+  streamFlowData: null,
 };
 
 function ConditionReport(props) {
-  const { tideStation, date } = props;
+  const { date, tideStation, streamFlowStation } = props;
   const [state, setState] = useState({ ...defaultState });
 
   function setStateHelper(obj) {
@@ -32,34 +29,34 @@ function ConditionReport(props) {
   }
 
   useEffect(() => {
-    if (tideStation) {
+    const getWeather = (date, lat, lng) => {
       myWeather
-        .getForecast(date, tideStation.t, tideStation.n)
+        .getForecast(date, lat, lng)
         .then((data) => {
-          setStateHelper({ weather: data });
+          setStateHelper({ weatherData: data });
         })
         .catch(() => {
-          setStateHelper({ weather: null });
+          setStateHelper({ weatherData: null });
         });
+    };
 
+    if (tideStation) {
+      getWeather(date, tideStation.t, tideStation.n);
       myTides.getTide(tideStation, date).then((data) => {
-        setStateHelper({ tides: data });
+        setStateHelper({ tideData: data });
       });
     }
-  }, [tideStation, date]);
 
-  function renderStation() {
-    if (tideStation) {
-      return (
-        <div>
-          <h1>{`${tideStation.i}`}</h1>
-        </div>
-      );
+    if (streamFlowStation) {
+      getWeather(date, streamFlowStation.t, streamFlowStation.n);
+      myStreamFlow.getStreamFlow(streamFlowStation, date).then((data) => {
+        setStateHelper({ streamFlowData: data });
+      });
     }
-  }
+  }, [date, tideStation, streamFlowStation]);
 
   function renderDate() {
-    if (tideStation) {
+    if (tideStation || streamFlowStation) {
       const options = {
         weekday: 'long',
         year: 'numeric',
@@ -74,17 +71,17 @@ function ConditionReport(props) {
     }
   }
 
-  function renderWeatherForecast() {
-    if (tideStation && state.weather) {
-      const { weather } = state;
+  function renderWeather() {
+    if ((tideStation || streamFlowStation) && state.weatherData) {
+      const { weatherData } = state;
       return (
         <div className="WeatherForecast">
           <div className="WeatherForecast-container">
-            {`${weather.forecast}, ${weather.temperature}, ${weather.wind}`}
+            {`${weatherData.forecast}, ${weatherData.temperature}, ${weatherData.wind}`}
           </div>
         </div>
       );
-    } else if (tideStation && !state.weather) {
+    } else if ((tideStation || streamFlowStation) && !state.weatherData) {
       return (
         <div className="WeatherForecast">
           <h3>Forecast Not Available</h3>
@@ -93,7 +90,7 @@ function ConditionReport(props) {
     }
   }
 
-  function renderTidesReport() {
+  function renderTides() {
     function deltaCard(arr, i) {
       const obj = arr[i];
       return (
@@ -116,8 +113,8 @@ function ConditionReport(props) {
       );
     }
 
-    if (state.tides) {
-      const { hilo, delta } = state.tides;
+    if (tideStation && state.tideData) {
+      const { siteName, hilo, delta } = state.tideData;
       const cards = [];
       let i;
       for (i = 0; i < hilo.length; i++) {
@@ -127,6 +124,9 @@ function ConditionReport(props) {
       cards.push(deltaCard(delta, hilo.length));
       return (
         <div className="ConditionReport">
+          <div>
+            <h1>{`${siteName}`}</h1>
+          </div>
           <div>Tide Report</div>
           <div className="ConditionReport-container">{cards}</div>
         </div>
@@ -134,12 +134,27 @@ function ConditionReport(props) {
     }
   }
 
+  function renderStreamFlow() {
+    if (streamFlowStation && state.streamFlowData) {
+      const { siteName } = state.streamFlowData;
+      console.log(state.streamFlowData);
+      return (
+        <div className="ConditionReport">
+          <div>
+            <h1>{`${siteName}`}</h1>
+          </div>
+          <div>Stream flow report here</div>
+        </div>
+      );
+    }
+  }
+
   return (
     <div>
-      {renderStation()}
       {renderDate()}
-      {renderWeatherForecast()}
-      {renderTidesReport()}
+      {renderWeather()}
+      {renderTides()}
+      {renderStreamFlow()}
     </div>
   );
 }

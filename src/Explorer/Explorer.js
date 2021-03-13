@@ -61,12 +61,18 @@ function Explorer(props) {
       </form>
       <OverlayMap
         location={state.location}
-        onTideStationClick={(tideStation) => setStateHelper({ tideStation })}
+        onTideStationClick={(tideStation) =>
+          setStateHelper({ tideStation, streamFlowStation: null })
+        }
         onStreamFlowStationClick={(streamFlowStation) =>
-          setStateHelper({ streamFlowStation })
+          setStateHelper({ tideStation: null, streamFlowStation })
         }
       />
-      <ConditionReport tideStation={state.tideStation} date={state.date} />
+      <ConditionReport
+        date={state.date}
+        tideStation={state.tideStation}
+        streamFlowStation={state.streamFlowStation}
+      />
     </div>
   );
 }
