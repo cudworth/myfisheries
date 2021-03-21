@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import './OverlayMap.css';
 import { Loader } from '@googlemaps/js-api-loader';
-import tideStations from '../Tides/tideStations.json';
-import streamFlowStations from '../StreamFlow/streamFlowStations.json';
-import { googleMapsKey } from '../private';
+import tideStations from '../ConditionReport/Tides/tideStations.json';
+import streamFlowStations from '../ConditionReport/StreamFlow/streamFlowStations.json';
+import { googleMapsKey } from '../../private';
 
 /* global google */
 

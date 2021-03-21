@@ -1,15 +1,13 @@
 import './ConditionReport.css';
 import { useEffect, useState } from 'react';
-import { weatherModule } from '../Weather/weatherModule';
-import { tidesModule } from '../Tides/tidesModule';
-import { streamFlowModule } from '../StreamFlow/streamFlowModule';
+import { tidesModule } from './Tides/tidesModule';
+import { streamFlowModule } from './StreamFlow/streamFlowModule';
+import Weather from './Weather/Weather';
 
-const myWeather = weatherModule();
 const myTides = tidesModule();
 const myStreamFlow = streamFlowModule();
 
 const defaultState = {
-  weatherData: null,
   tideData: null,
   streamFlowData: null,
 };
@@ -29,26 +27,13 @@ function ConditionReport(props) {
   }
 
   useEffect(() => {
-    const getWeather = (date, lat, lng) => {
-      myWeather
-        .getForecast(date, lat, lng)
-        .then((data) => {
-          setStateHelper({ weatherData: data });
-        })
-        .catch(() => {
-          setStateHelper({ weatherData: null });
-        });
-    };
-
     if (tideStation) {
-      getWeather(date, tideStation.t, tideStation.n);
       myTides.getTide(tideStation, date).then((data) => {
         setStateHelper({ tideData: data });
       });
     }
 
     if (streamFlowStation) {
-      getWeather(date, streamFlowStation.t, streamFlowStation.n);
       myStreamFlow.getStreamFlow(streamFlowStation, date).then((data) => {
         setStateHelper({ streamFlowData: data });
       });
@@ -66,25 +51,6 @@ function ConditionReport(props) {
       return (
         <div>
           <h2>{date.toLocaleString('en-US', options)}</h2>
-        </div>
-      );
-    }
-  }
-
-  function renderWeather() {
-    if ((tideStation || streamFlowStation) && state.weatherData) {
-      const { weatherData } = state;
-      return (
-        <div className="WeatherForecast">
-          <div className="WeatherForecast-container">
-            {`${weatherData.forecast}, ${weatherData.temperature}, ${weatherData.wind}`}
-          </div>
-        </div>
-      );
-    } else if ((tideStation || streamFlowStation) && !state.weatherData) {
-      return (
-        <div className="WeatherForecast">
-          <h3>Forecast Not Available</h3>
         </div>
       );
     }
@@ -146,6 +112,22 @@ function ConditionReport(props) {
           <div>Stream flow report here</div>
         </div>
       );
+    }
+  }
+
+  function renderWeather() {
+    if (streamFlowStation) {
+      return (
+        <Weather
+          date={date}
+          lat={streamFlowStation.t}
+          lng={streamFlowStation.n}
+        />
+      );
+    }
+
+    if (tideStation) {
+      return <Weather date={date} lat={tideStation.t} lng={tideStation.n} />;
     }
   }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Explorer.css';
-import OverlayMap from '../OverlayMap/OverlayMap';
-import ConditionReport from '../ConditionReport/ConditionReport';
+import OverlayMap from './OverlayMap/OverlayMap';
+import ConditionReport from './ConditionReport/ConditionReport';
 
 const defaultState = {
   location: '',
