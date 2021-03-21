@@ -27,7 +27,7 @@ function Tides(props) {
   function deltaCard(arr, i) {
     const obj = arr[i];
     return (
-      <div className="ConditionReport-delta-card" key={`delta_key_${i}`}>
+      <div className="Tides-delta-card" key={`delta_key_${i}`}>
         <div>{obj.type}</div>
         <div>{obj.duration}</div>
         <div>{obj.rate}</div>
@@ -38,7 +38,7 @@ function Tides(props) {
   function hiloCard(arr, i) {
     const obj = arr[i];
     return (
-      <div className="ConditionReport-hilo-card" key={`hilo_key_${i}`}>
+      <div className="Tides-hilo-card" key={`hilo_key_${i}`}>
         <div>{obj.type}</div>
         <div>{obj.time}</div>
         <div>{obj.height}</div>
@@ -56,16 +56,16 @@ function Tides(props) {
     }
     cards.push(deltaCard(delta, hilo.length));
     return (
-      <div className="ConditionReport">
+      <div className="Tides">
         <div>
           <h1>{`${siteName}`}</h1>
         </div>
         <div>Tide Report</div>
-        <div className="ConditionReport-container">{cards}</div>
+        <div className="Tides-container">{cards}</div>
       </div>
     );
   } else {
-    return <div className="ConditionReport">Loading Tide Report</div>;
+    return <div className="Tides">Loading Tide Report</div>;
   }
 }
 

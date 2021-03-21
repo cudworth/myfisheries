@@ -28,7 +28,7 @@ function StreamFlow(props) {
     const { siteName } = state.data;
     console.log(state.data);
     return (
-      <div className="ConditionReport">
+      <div className="StreamFlow">
         <div>
           <h1>{`${siteName}`}</h1>
         </div>
@@ -36,7 +36,7 @@ function StreamFlow(props) {
       </div>
     );
   } else {
-    return <div className="ConditionReport">Loading Stream Flow Report</div>;
+    return <div className="StreamFlow">Loading Stream Flow Report</div>;
   }
 }
 
