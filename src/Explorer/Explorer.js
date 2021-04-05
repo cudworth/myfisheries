@@ -5,7 +5,7 @@ import ConditionReport from './ConditionReport/ConditionReport';
 
 const defaultState = {
   location: '',
-  inputText: null,
+  inputText: '',
   htmlDate: getHtmlDate(),
   date: getDate(),
   tideStation: null,

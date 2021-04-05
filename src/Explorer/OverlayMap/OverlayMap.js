@@ -40,12 +40,52 @@ function OverlayMap(props) {
       });
 
       ref.current.geocoder = new google.maps.Geocoder();
+
+      function updateMarkers() {
+        const bounds = ref.current.map.getBounds();
+        const southWest = bounds.getSouthWest();
+        const northEast = bounds.getNorthEast();
+        const center = ref.current.map.getCenter();
+        const [centerLat, centerLng] = [center.lat(), center.lng()];
+
+        const maxRadius =
+          ((northEast.lat() - southWest.lat()) / 2) ** 2 +
+          ((northEast.lng() - southWest.lng()) / 2) ** 2;
+
+        purgeMarkers();
+
+        addMarkers(tideStations, onTideStationClick);
+        addMarkers(streamFlowStations, onStreamFlowStationClick);
+
+        function purgeMarkers() {
+          ref.current.activeMarkers.forEach((marker) => {
+            marker.setMap(null);
+          });
+          ref.current.activeMarkers.length = 0;
+        }
+
+        function addMarkers(stationList, onClick) {
+          stationList.forEach((station) => {
+            const radius =
+              (station.t - centerLat) ** 2 + (station.n - centerLng) ** 2;
+            if (radius < maxRadius) {
+              const marker = new google.maps.Marker({
+                position: { lat: station.t, lng: station.n },
+              });
+              marker.addListener('click', () => {
+                onClick(station);
+              });
+              marker.setMap(ref.current.map);
+              ref.current.activeMarkers.push(marker);
+            }
+          });
+        }
+      }
     });
-  }, []);
+  }, [onStreamFlowStationClick, onTideStationClick]);
 
   useEffect(() => {
     if (location) {
-      console.log('MapTo effect triggered');
       mapTo(location);
     }
   }, [location]);
@@ -65,46 +105,6 @@ function OverlayMap(props) {
     );
   }
 
-  function purgeMarkers() {
-    ref.current.activeMarkers.forEach((marker) => {
-      marker.setMap(null);
-    });
-    ref.current.activeMarkers.length = 0;
-  }
-
-  function updateMarkers() {
-    const bounds = ref.current.map.getBounds();
-    const southWest = bounds.getSouthWest();
-    const northEast = bounds.getNorthEast();
-    const center = ref.current.map.getCenter();
-    const [centerLat, centerLng] = [center.lat(), center.lng()];
-
-    const maxRadius =
-      ((northEast.lat() - southWest.lat()) / 2) ** 2 +
-      ((northEast.lng() - southWest.lng()) / 2) ** 2;
-
-    purgeMarkers();
-
-    addMarkers(tideStations, onTideStationClick);
-    addMarkers(streamFlowStations, onStreamFlowStationClick);
-
-    function addMarkers(stationList, onClick) {
-      stationList.forEach((station) => {
-        const radius =
-          (station.t - centerLat) ** 2 + (station.n - centerLng) ** 2;
-        if (radius < maxRadius) {
-          const marker = new google.maps.Marker({
-            position: { lat: station.t, lng: station.n },
-          });
-          marker.addListener('click', () => {
-            onClick(station);
-          });
-          marker.setMap(ref.current.map);
-          ref.current.activeMarkers.push(marker);
-        }
-      });
-    }
-  }
   return <div id="overlay-map" className="overlay-map"></div>;
 }
 
